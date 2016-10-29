@@ -1,0 +1,4 @@
+*.pyc
+.tox
+trac_configurable_ctu.egg-info
+venv
