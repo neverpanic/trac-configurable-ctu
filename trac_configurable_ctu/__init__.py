@@ -94,6 +94,7 @@ class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
             message = content
             resource = Resource('repository', reponame)
         if ChangesetModule(self.env).wiki_format_messages:
+            message = '\n'.join(map(lambda line: "> " + line, message.split('\n')))
             return tag.div(format_to_html(
                 self.env,
                 formatter.context.child('changeset', rev, parent=resource),
