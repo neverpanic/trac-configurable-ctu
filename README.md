@@ -39,6 +39,26 @@ Note that the regular expression to match ticket expressions must not include
 the ticket number (which is expected right after the regular expression) and
 must not create capturing groups.
 
+The display of the referenced commit messages in the ticket comment can be
+modified with replacements using regular expressions. These can be defined in
+their own configuration section:
+
+    [commit-ticket-update-replace]
+    name.pattern = PR-\d+
+    name.replace = https://example.org/$(repository)s/\1
+
+The name has no further meaning than identifying a pair of pattern and replace
+and will be ignored.
+
+The following variables will be substituted in both pattern and replace before
+applying the regular expression:
+
+- $(repository)s    name of the repository committed to
+- $(revision)s      revision of the commit
+
+Note the usage of `$(...)s` instead of `%(...)s` as the latter form would be
+interpreted by the ConfigParser itself.
+
 Development
 -----------
 
