@@ -29,8 +29,8 @@ Both are required for `trac_configurable_ctu` to work correctly.
 Edit your `trac.ini` as follows to enable and configure both plugins:
 
     [components]
-	trac_configurable_ctu.ConfigurableCommitTicketReferenceMacro = enabled
-	trac_configurable_ctu.ConfigurableCommitTicketUpdater = enabled
+    trac_configurable_ctu.ConfigurableCommitTicketReferenceMacro = enabled
+    trac_configurable_ctu.ConfigurableCommitTicketUpdater = enabled
 
     [ticket]
     commit_ticket_update_ticket_prefix = (?:trac-ticket(?:[: ]+)?)
@@ -45,12 +45,12 @@ Development
 In a [virtualenv](http://www.virtualenv.org/), install the requirements:
 
     pip install trac
-	pip install tox
+    pip install tox
     pip install -e .
 
 Run pylint with
 
-	tox -e pylint 
+    tox -e pylint 
 
 Changelog
 ---------
