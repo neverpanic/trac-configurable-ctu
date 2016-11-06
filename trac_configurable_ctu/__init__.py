@@ -9,7 +9,7 @@ import re
 
 from genshi.builder import tag
 
-from trac.config import Option
+from trac.config import Option, ConfigSection
 from trac.resource import Resource
 from trac.versioncontrol import RepositoryManager
 from trac.versioncontrol.web_ui.changeset import ChangesetModule
@@ -78,6 +78,26 @@ class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
 
     # pylint: disable=abstract-method
 
+    ticket_replace_section = ConfigSection('commit-ticket-update-replace',
+        """In this section, you can define patterns for substitution in the
+        commit message in the format:
+
+        name.pattern = PR-\d+
+        name.replace = https://example.org/$(repository)s/\1
+
+        The name has no further meaning than identifying a pair of pattern and
+        replace and will be ignored.
+
+        The following variables will be substituted in both pattern and replace
+        before applying the regular expression:
+
+        - $(repository)s    name of the repository committed to
+        - $(revision)s      revision of the commit
+
+        Note the usage of `$(...)s` instead of `%(...)s` as the latter form
+        would be interpreted by the ConfigParser itself.
+        """)
+
     def expand_macro(self, formatter, name, content, args=None):
         # pylint: disable=too-many-function-args
         args = args or {}
@@ -93,6 +113,19 @@ class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
         except Exception: # pylint: disable=broad-except
             message = content
             resource = Resource('repository', reponame)
+        config = self.ticket_replace_section
+        fields = {}
+        for key, value in config.options():
+            prefix, option = key.split('.')
+            field = fields.setdefault(prefix, {})
+            field[option] = config.get(key)
+        for prefix, field in fields.iteritems():
+            if not all (k in field for k in ['pattern', 'replace']):
+                continue
+            subst = {'repository': reponame, 'revision': rev}
+            pattern = field['pattern'].replace('$(', '%(') % subst
+            replace = field['replace'].replace('$(', '%(') % subst
+            message = re.sub(pattern, replace, message)
         if ChangesetModule(self.env).wiki_format_messages:
             message = '\n'.join(map(lambda line: "> " + line, message.split('\n')))
             return tag.div(format_to_html(
