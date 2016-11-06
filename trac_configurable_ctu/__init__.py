@@ -78,7 +78,8 @@ class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
 
     # pylint: disable=abstract-method
 
-    ticket_replace_section = ConfigSection('commit-ticket-update-replace',
+    ticket_replace_section_name = 'commit-ticket-update-replace'
+    ticket_replace_section = ConfigSection(ticket_replace_section_name,
         """In this section, you can define patterns for substitution in the
         commit message in the format:
 
@@ -116,11 +117,17 @@ class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
         config = self.ticket_replace_section
         fields = {}
         for key, value in config.options():
-            prefix, option = key.split('.')
-            field = fields.setdefault(prefix, {})
-            field[option] = config.get(key)
+            idx = key.rfind('.')
+            if idx >= 0:
+                prefix, attribute = key[:idx], key[idx+1:]
+                field = fields.setdefault(prefix, {})
+                field[attribute] = config.get(key)
+            else:
+                fields[key] = {'': value}
         for prefix, field in fields.iteritems():
             if not all (k in field for k in ['pattern', 'replace']):
+                self.log.warn("Ignoring [%s] %s, missing .pattern or .replace"
+                    % (self.ticket_replace_section_name, key))
                 continue
             subst = {'repository': reponame, 'revision': rev}
             pattern = field['pattern'].replace('$(', '%(') % subst
