@@ -62,12 +62,14 @@ class ConfigurableCommitTicketUpdater(CommitTicketUpdater):
         if repos.reponame:
             revstring += '/' + repos.reponame
             drev += '/' + repos.reponame
+        branches = changeset.get_branches()
+        branchlist = ", ".join([b[0] for b in branches])
         return """\
-In [changeset:"%s" %s]:
+In [changeset:"%s" %s] (%s):
 {{{
 #!ConfigurableCommitTicketReference repository="%s" revision="%s"
 %s
-}}}""" % (revstring, drev, repos.reponame, rev, changeset.message.strip())
+}}}""" % (revstring, drev, branchlist, repos.reponame, rev, changeset.message.strip())
 
 class ConfigurableCommitTicketReferenceMacro(CommitTicketReferenceMacro):
     """
